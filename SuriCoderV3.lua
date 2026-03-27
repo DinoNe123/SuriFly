@@ -1,3 +1,14 @@
+--[[
+    🔥 PREMIUM HUB v2 - FINAL UPDATE (CỰC ĐẸP & HOÀN HẢO)
+    Thiết kế sang trọng • Dark Luxury Theme • Gradient + Stroke + Hover + Tween mượt
+    3 Tab: ESP • Teleport • Fly
+    ESP đã bỏ hoàn toàn thanh máu (chỉ còn Highlight + Box 3D + NameTag đẹp)
+    Fly: Toggle + Speed điều chỉnh realtime
+    Keybind: Right Ctrl (bật/tắt ESP)
+    ✨ Nút ngoài "SCx" luôn hiển thị (dành cho điện thoại)
+    ✨ Teleport list LUÔN CẬP NHẬT realtime
+    ✨ KÉO GÓC DƯỚI BÊN PHẢI: ĐÃ SỬA LỖI - BÂY GIỜ CÓ THỂ PHÓNG TO & THU NHỎ ĐẦY ĐỦ
+]]
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -66,7 +77,7 @@ Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Position = UDim2.new(0, 20, 0, 0)
 Title.Parent = TitleBar
 
--- ==================== NÚT NGOÀI BẬT/TẮT MENU (DÀNH CHO ĐIỆN THOẠI) ====================
+-- ==================== NÚT NGOÀI BẬT/TẮT MENU (ĐIỆN THOẠI) ====================
 local ToggleButton = Instance.new("TextButton")
 ToggleButton.Size = UDim2.new(0, 70, 0, 70)
 ToggleButton.Position = UDim2.new(0, 20, 0, 20)
@@ -89,7 +100,6 @@ ToggleStroke.Thickness = 3
 ToggleStroke.Transparency = 0.4
 ToggleStroke.Parent = ToggleButton
 
--- Hover effect cho nút ngoài
 ToggleButton.MouseEnter:Connect(function()
     TweenService:Create(ToggleButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(100, 200, 255)}):Play()
 end)
@@ -103,9 +113,8 @@ ToggleButton.MouseButton1Click:Connect(function()
     MainFrame.Visible = menuVisible
 end)
 
--- ==================== NÚT TẮT MENU TRONG TITLE (×) ====================
+-- ==================== NÚT TẮT MENU TRONG TITLE ====================
 local CloseBtn = Instance.new("TextButton")
-CloseBtn.Name = "CloseBtn"
 CloseBtn.Size = UDim2.new(0, 50, 0, 50)
 CloseBtn.Position = UDim2.new(1, -55, 0.5, -25)
 CloseBtn.BackgroundTransparency = 1
@@ -119,7 +128,7 @@ CloseBtn.MouseButton1Click:Connect(function()
     MainFrame.Visible = false
 end)
 
--- ==================== RESIZE HANDLE ====================
+-- ==================== RESIZE HANDLE (ĐÃ SỬA LỖI - CÓ THỂ TO & NHỎ) ====================
 local ResizeHandle = Instance.new("Frame")
 ResizeHandle.Name = "ResizeHandle"
 ResizeHandle.Size = UDim2.new(0, 30, 0, 30)
@@ -142,7 +151,7 @@ local ResizeCorner = Instance.new("UICorner")
 ResizeCorner.CornerRadius = UDim.new(0, 6)
 ResizeCorner.Parent = ResizeHandle
 
--- Tab Bar, Tab Buttons, Content Frames (giữ nguyên như cũ)
+-- ==================== TAB BAR & BUTTONS ====================
 local TabBar = Instance.new("Frame")
 TabBar.Size = UDim2.new(1, -20, 0, 50)
 TabBar.Position = UDim2.new(0, 10, 0, 70)
@@ -185,6 +194,7 @@ local ESPTab = CreateTabButton("ESP", Color3.fromRGB(60, 160, 255))
 local TPTab = CreateTabButton("Teleport", Color3.fromRGB(80, 200, 80))
 local FlyTab = CreateTabButton("Fly", Color3.fromRGB(200, 100, 255))
 
+-- Content Frames
 local ESPContent = Instance.new("Frame")
 ESPContent.Size = UDim2.new(1, -20, 1, -140)
 ESPContent.Position = UDim2.new(0, 10, 0, 130)
@@ -229,7 +239,7 @@ ESPStatus.Font = Enum.Font.GothamBlack
 ESPStatus.TextSize = 18
 ESPStatus.Parent = ESPContent
 
--- ==================== TELEPORT SECTION (ĐÃ CẬP NHẬT LUÔN) ====================
+-- ==================== TELEPORT SECTION ====================
 local ScrollingFrame = Instance.new("ScrollingFrame")
 ScrollingFrame.Size = UDim2.new(1, 0, 1, -70)
 ScrollingFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
@@ -326,6 +336,40 @@ local flyConnection = nil
 local isResizing = false
 local MIN_WIDTH = 320
 local MIN_HEIGHT = 420
+
+-- ==================== RESIZE LOGIC (ĐÃ SỬA HOÀN TOÀN) ====================
+local initialMouseX, initialMouseY
+local initialWidth, initialHeight
+
+ResizeHandle.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        isResizing = true
+        local mousePos = UserInputService:GetMouseLocation()
+        initialMouseX = mousePos.X
+        initialMouseY = mousePos.Y
+        initialWidth = MainFrame.AbsoluteSize.X
+        initialHeight = MainFrame.AbsoluteSize.Y
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        isResizing = false
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    if isResizing then
+        local mousePos = UserInputService:GetMouseLocation()
+        local deltaX = mousePos.X - initialMouseX
+        local deltaY = mousePos.Y - initialMouseY
+        
+        local newWidth = math.max(initialWidth + deltaX, MIN_WIDTH)
+        local newHeight = math.max(initialHeight + deltaY, MIN_HEIGHT)
+        
+        MainFrame.Size = UDim2.new(0, newWidth, 0, newHeight)
+    end
+end)
 
 -- ==================== ESP FUNCTIONS ====================
 local function createESP(char, player)
@@ -467,7 +511,7 @@ UserInputService.InputBegan:Connect(function(input, gp)
     if input.KeyCode == Enum.KeyCode.RightControl then toggleESP() end
 end)
 
--- ==================== TELEPORT (LUÔN CẬP NHẬT REALTIME) ====================
+-- ==================== TELEPORT ====================
 local teleportTarget = nil
 
 local function updatePlayerList()
@@ -524,30 +568,7 @@ FlySwitch.InputBegan:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then toggleFly() end
 end)
 
--- ==================== RESIZE LOGIC ====================
-ResizeHandle.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        isResizing = true
-    end
-end)
-
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        isResizing = false
-    end
-end)
-
-RunService.RenderStepped:Connect(function()
-    if isResizing then
-        local mousePos = UserInputService:GetMouseLocation()
-        local framePos = MainFrame.AbsolutePosition
-        local newWidth = math.max(mousePos.X - framePos.X + 15, MIN_WIDTH)
-        local newHeight = math.max(mousePos.Y - framePos.Y + 15, MIN_HEIGHT)
-        MainFrame.Size = UDim2.new(0, newWidth, 0, newHeight)
-    end
-end)
-
--- ==================== CONNECTIONS (TELEPORT & ESP CẬP NHẬT REALTIME) ====================
+-- ==================== CONNECTIONS ====================
 Players.PlayerAdded:Connect(function(p)
     task.wait(0.6)
     updatePlayerList()
@@ -563,4 +584,4 @@ end)
 task.wait(1)
 updatePlayerList()
 if _G.ESPEnabled then refreshESP() end
-print("✅ SCxSuri PREMIUM HUB ĐÃ LOAD XONG (Nút ngoài + Teleport realtime + Resize) - Dùng vui!")
+print("✅ SCxSuri PREMIUM HUB - FINAL VERSION (RESIZE ĐÃ SỬA - CÓ THỂ TO & NHỎ THOẢI MÁI)")
