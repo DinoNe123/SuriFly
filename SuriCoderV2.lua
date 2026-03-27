@@ -1,13 +1,3 @@
---[[
-    🔥 PREMIUM HUB v2 - CỰC ĐẸP & MƯỢT MÀ (ĐÃ CẬP NHẬT)
-    Thiết kế sang trọng • Dark Luxury Theme • Gradient + Stroke + Hover + Tween mượt
-    3 Tab: ESP • Teleport • Fly
-    ESP đã bỏ hoàn toàn thanh máu (chỉ còn Highlight + Box 3D + NameTag đẹp)
-    Fly: Toggle + Speed điều chỉnh realtime
-    Keybind: Right Ctrl (bật/tắt ESP)
-    ✨ MỚI: Có thể kéo phóng to / thu nhỏ từ góc dưới bên phải
-    ✨ MỚI: Nút tắt menu (X) - Dành riêng cho điện thoại
-]]
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -33,6 +23,7 @@ MainFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
+MainFrame.Visible = true
 MainFrame.Parent = ScreenGui
 
 -- Stroke ngoài + góc bo cao cấp
@@ -65,7 +56,7 @@ TitleCorner.CornerRadius = UDim.new(0, 16)
 TitleCorner.Parent = TitleBar
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -80, 1, 0)  -- bớt chỗ cho nút X
+Title.Size = UDim2.new(1, -80, 1, 0)
 Title.BackgroundTransparency = 1
 Title.Text = "SCxSuri"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -75,7 +66,44 @@ Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Position = UDim2.new(0, 20, 0, 0)
 Title.Parent = TitleBar
 
--- ==================== NÚT TẮT MENU (DÀNH CHO ĐIỆN THOẠI) ====================
+-- ==================== NÚT NGOÀI BẬT/TẮT MENU (DÀNH CHO ĐIỆN THOẠI) ====================
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Size = UDim2.new(0, 70, 0, 70)
+ToggleButton.Position = UDim2.new(0, 20, 0, 20)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(80, 180, 255)
+ToggleButton.BackgroundTransparency = 0.1
+ToggleButton.Text = "SCx"
+ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleButton.Font = Enum.Font.GothamBlack
+ToggleButton.TextSize = 24
+ToggleButton.ZIndex = 999
+ToggleButton.Parent = ScreenGui
+
+local ToggleCorner = Instance.new("UICorner")
+ToggleCorner.CornerRadius = UDim.new(1, 0)
+ToggleCorner.Parent = ToggleButton
+
+local ToggleStroke = Instance.new("UIStroke")
+ToggleStroke.Color = Color3.fromRGB(255, 255, 255)
+ToggleStroke.Thickness = 3
+ToggleStroke.Transparency = 0.4
+ToggleStroke.Parent = ToggleButton
+
+-- Hover effect cho nút ngoài
+ToggleButton.MouseEnter:Connect(function()
+    TweenService:Create(ToggleButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(100, 200, 255)}):Play()
+end)
+ToggleButton.MouseLeave:Connect(function()
+    TweenService:Create(ToggleButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80, 180, 255)}):Play()
+end)
+
+local menuVisible = true
+ToggleButton.MouseButton1Click:Connect(function()
+    menuVisible = not menuVisible
+    MainFrame.Visible = menuVisible
+end)
+
+-- ==================== NÚT TẮT MENU TRONG TITLE (×) ====================
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Name = "CloseBtn"
 CloseBtn.Size = UDim2.new(0, 50, 0, 50)
@@ -88,10 +116,10 @@ CloseBtn.TextSize = 42
 CloseBtn.Parent = TitleBar
 
 CloseBtn.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
+    MainFrame.Visible = false
 end)
 
--- ==================== RESIZE HANDLE (KÉO PHÓNG TO / THU NHỎ TỪ GÓC) ====================
+-- ==================== RESIZE HANDLE ====================
 local ResizeHandle = Instance.new("Frame")
 ResizeHandle.Name = "ResizeHandle"
 ResizeHandle.Size = UDim2.new(0, 30, 0, 30)
@@ -114,7 +142,7 @@ local ResizeCorner = Instance.new("UICorner")
 ResizeCorner.CornerRadius = UDim.new(0, 6)
 ResizeCorner.Parent = ResizeHandle
 
--- Tab Bar
+-- Tab Bar, Tab Buttons, Content Frames (giữ nguyên như cũ)
 local TabBar = Instance.new("Frame")
 TabBar.Size = UDim2.new(1, -20, 0, 50)
 TabBar.Position = UDim2.new(0, 10, 0, 70)
@@ -127,7 +155,6 @@ TabList.HorizontalAlignment = Enum.HorizontalAlignment.Center
 TabList.Padding = UDim.new(0, 8)
 TabList.Parent = TabBar
 
--- 3 Tab Buttons
 local function CreateTabButton(text, color)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 100, 1, 0)
@@ -145,7 +172,6 @@ local function CreateTabButton(text, color)
     btnStroke.Thickness = 1.5
     btnStroke.Transparency = 0.6
     btnStroke.Parent = btn
-    -- Hover effect
     btn.MouseEnter:Connect(function()
         TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = color:Lerp(Color3.fromRGB(255,255,255), 0.15)}):Play()
     end)
@@ -159,7 +185,6 @@ local ESPTab = CreateTabButton("ESP", Color3.fromRGB(60, 160, 255))
 local TPTab = CreateTabButton("Teleport", Color3.fromRGB(80, 200, 80))
 local FlyTab = CreateTabButton("Fly", Color3.fromRGB(200, 100, 255))
 
--- Content Frames
 local ESPContent = Instance.new("Frame")
 ESPContent.Size = UDim2.new(1, -20, 1, -140)
 ESPContent.Position = UDim2.new(0, 10, 0, 130)
@@ -187,21 +212,13 @@ ESPSwitch.Size = UDim2.new(0, 80, 0, 38)
 ESPSwitch.Position = UDim2.new(0.5, -40, 0, 20)
 ESPSwitch.BackgroundColor3 = Color3.fromRGB(0, 200, 120)
 ESPSwitch.Parent = ESPContent
-
-local SwitchCorner = Instance.new("UICorner")
-SwitchCorner.CornerRadius = UDim.new(1, 0)
-SwitchCorner.Parent = ESPSwitch
-
+local SwitchCorner = Instance.new("UICorner") SwitchCorner.CornerRadius = UDim.new(1, 0) SwitchCorner.Parent = ESPSwitch
 local SwitchCircle = Instance.new("Frame")
 SwitchCircle.Size = UDim2.new(0, 32, 0, 32)
 SwitchCircle.Position = UDim2.new(1, -35, 0.5, -16)
 SwitchCircle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 SwitchCircle.Parent = ESPSwitch
-
-local CircleCorner = Instance.new("UICorner")
-CircleCorner.CornerRadius = UDim.new(1, 0)
-CircleCorner.Parent = SwitchCircle
-
+local CircleCorner = Instance.new("UICorner") CircleCorner.CornerRadius = UDim.new(1, 0) CircleCorner.Parent = SwitchCircle
 local ESPStatus = Instance.new("TextLabel")
 ESPStatus.Size = UDim2.new(1, 0, 0, 40)
 ESPStatus.Position = UDim2.new(0, 0, 0, 75)
@@ -212,7 +229,7 @@ ESPStatus.Font = Enum.Font.GothamBlack
 ESPStatus.TextSize = 18
 ESPStatus.Parent = ESPContent
 
--- ==================== TELEPORT SECTION ====================
+-- ==================== TELEPORT SECTION (ĐÃ CẬP NHẬT LUÔN) ====================
 local ScrollingFrame = Instance.new("ScrollingFrame")
 ScrollingFrame.Size = UDim2.new(1, 0, 1, -70)
 ScrollingFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
@@ -243,10 +260,7 @@ TPBtn.TextColor3 = Color3.new(1,1,1)
 TPBtn.Font = Enum.Font.GothamBlack
 TPBtn.TextSize = 18
 TPBtn.Parent = TPContent
-
-local TPBtnCorner = Instance.new("UICorner")
-TPBtnCorner.CornerRadius = UDim.new(0, 12)
-TPBtnCorner.Parent = TPBtn
+local TPBtnCorner = Instance.new("UICorner") TPBtnCorner.CornerRadius = UDim.new(0, 12) TPBtnCorner.Parent = TPBtn
 
 -- ==================== FLY SECTION ====================
 local FlySwitch = Instance.new("Frame")
@@ -254,21 +268,13 @@ FlySwitch.Size = UDim2.new(0, 80, 0, 38)
 FlySwitch.Position = UDim2.new(0.5, -40, 0, 20)
 FlySwitch.BackgroundColor3 = Color3.fromRGB(180, 80, 255)
 FlySwitch.Parent = FlyContent
-
-local FlySwitchCorner = Instance.new("UICorner")
-FlySwitchCorner.CornerRadius = UDim.new(1, 0)
-FlySwitchCorner.Parent = FlySwitch
-
+local FlySwitchCorner = Instance.new("UICorner") FlySwitchCorner.CornerRadius = UDim.new(1, 0) FlySwitchCorner.Parent = FlySwitch
 local FlyCircle = Instance.new("Frame")
 FlyCircle.Size = UDim2.new(0, 32, 0, 32)
 FlyCircle.Position = UDim2.new(0, 3, 0.5, -16)
 FlyCircle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 FlyCircle.Parent = FlySwitch
-
-local FlyCircleCorner = Instance.new("UICorner")
-FlyCircleCorner.CornerRadius = UDim.new(1, 0)
-FlyCircleCorner.Parent = FlyCircle
-
+local FlyCircleCorner = Instance.new("UICorner") FlyCircleCorner.CornerRadius = UDim.new(1, 0) FlyCircleCorner.Parent = FlyCircle
 local FlyLabel = Instance.new("TextLabel")
 FlyLabel.Size = UDim2.new(1, 0, 0, 40)
 FlyLabel.Position = UDim2.new(0, 0, 0, 75)
@@ -299,10 +305,7 @@ SpeedBox.TextColor3 = Color3.new(1,1,1)
 SpeedBox.Font = Enum.Font.GothamBold
 SpeedBox.TextSize = 16
 SpeedBox.Parent = FlyContent
-
-local SpeedBoxCorner = Instance.new("UICorner")
-SpeedBoxCorner.CornerRadius = UDim.new(0, 8)
-SpeedBoxCorner.Parent = SpeedBox
+local SpeedBoxCorner = Instance.new("UICorner") SpeedBoxCorner.CornerRadius = UDim.new(0, 8) SpeedBoxCorner.Parent = SpeedBox
 
 local ApplySpeedBtn = Instance.new("TextButton")
 ApplySpeedBtn.Size = UDim2.new(0.35, 0, 0, 35)
@@ -313,17 +316,13 @@ ApplySpeedBtn.TextColor3 = Color3.new(1,1,1)
 ApplySpeedBtn.Font = Enum.Font.GothamBold
 ApplySpeedBtn.TextSize = 15
 ApplySpeedBtn.Parent = FlyContent
+local ApplyCorner = Instance.new("UICorner") ApplyCorner.CornerRadius = UDim.new(0, 10) ApplyCorner.Parent = ApplySpeedBtn
 
-local ApplyCorner = Instance.new("UICorner")
-ApplyCorner.CornerRadius = UDim.new(0, 10)
-ApplyCorner.Parent = ApplySpeedBtn
-
--- ==================== BIẾN FLY & RESIZE ====================
+-- ==================== BIẾN ====================
 local flying = false
 local flySpeed = 120
 local flyBodyVelocity = nil
 local flyConnection = nil
-
 local isResizing = false
 local MIN_WIDTH = 320
 local MIN_HEIGHT = 420
@@ -334,28 +333,24 @@ local function createESP(char, player)
     local folder = Instance.new("Folder")
     folder.Name = "PremiumESP"
     folder.Parent = char
-
     local hl = Instance.new("Highlight")
     hl.Adornee = char
     hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
     hl.FillTransparency = 0.45
     hl.OutlineTransparency = 0
     hl.Parent = folder
-
     local box = Instance.new("BoxHandleAdornment")
     box.Adornee = char
     box.Size = Vector3.new(2.2, 4.2, 2.2)
     box.Transparency = 0.6
     box.AlwaysOnTop = true
     box.Parent = folder
-
     local bill = Instance.new("BillboardGui")
     bill.Adornee = char:WaitForChild("Head")
     bill.Size = UDim2.new(0, 240, 0, 50)
     bill.StudsOffset = Vector3.new(0, 3.8, 0)
     bill.AlwaysOnTop = true
     bill.Parent = folder
-
     local nameTag = Instance.new("TextLabel")
     nameTag.Size = UDim2.new(1, 0, 1, 0)
     nameTag.BackgroundTransparency = 1
@@ -366,7 +361,6 @@ local function createESP(char, player)
     nameTag.Font = Enum.Font.GothamBlack
     nameTag.TextSize = 19
     nameTag.Parent = bill
-
     return {Highlight = hl, Box = box, NameTag = nameTag}
 end
 
@@ -399,10 +393,7 @@ end
 local function toggleFly()
     flying = not flying
     if flying then
-        if not plr.Character or not plr.Character:FindFirstChild("HumanoidRootPart") then
-            flying = false
-            return
-        end
+        if not plr.Character or not plr.Character:FindFirstChild("HumanoidRootPart") then flying = false return end
         FlySwitch.BackgroundColor3 = Color3.fromRGB(180, 80, 255)
         TweenService:Create(FlyCircle, TweenInfo.new(0.3), {Position = UDim2.new(1, -35, 0.5, -16)}):Play()
         FlyLabel.Text = "FLY: ENABLED"
@@ -422,11 +413,7 @@ local function toggleFly()
             if UserInputService:IsKeyDown(Enum.KeyCode.D) then dir += cam.CFrame.RightVector end
             if UserInputService:IsKeyDown(Enum.KeyCode.Space) then dir += Vector3.new(0,1,0) end
             if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then dir -= Vector3.new(0,1,0) end
-            if dir.Magnitude > 0 then
-                flyBodyVelocity.Velocity = dir.Unit * flySpeed
-            else
-                flyBodyVelocity.Velocity = Vector3.new(0,0,0)
-            end
+            flyBodyVelocity.Velocity = dir.Magnitude > 0 and dir.Unit * flySpeed or Vector3.new(0,0,0)
         end)
     else
         FlySwitch.BackgroundColor3 = Color3.fromRGB(70, 70, 80)
@@ -472,20 +459,15 @@ local function toggleESP()
 end
 
 ESPSwitch.InputBegan:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then 
-        toggleESP() 
-    end
+    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then toggleESP() end
 end)
 
--- Keybind Right Ctrl
 UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
-    if input.KeyCode == Enum.KeyCode.RightControl then
-        toggleESP()
-    end
+    if input.KeyCode == Enum.KeyCode.RightControl then toggleESP() end
 end)
 
--- ==================== TELEPORT ====================
+-- ==================== TELEPORT (LUÔN CẬP NHẬT REALTIME) ====================
 local teleportTarget = nil
 
 local function updatePlayerList()
@@ -539,12 +521,10 @@ ApplySpeedBtn.MouseButton1Click:Connect(function()
 end)
 
 FlySwitch.InputBegan:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then 
-        toggleFly() 
-    end
+    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then toggleFly() end
 end)
 
--- ==================== RESIZE LOGIC (KÉO GÓC DƯỚI BÊN PHẢI) ====================
+-- ==================== RESIZE LOGIC ====================
 ResizeHandle.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         isResizing = true
@@ -561,14 +541,13 @@ RunService.RenderStepped:Connect(function()
     if isResizing then
         local mousePos = UserInputService:GetMouseLocation()
         local framePos = MainFrame.AbsolutePosition
-        local newWidth = math.max(mousePos.X - framePos.X + 15, MIN_WIDTH)   -- +15 để mượt
+        local newWidth = math.max(mousePos.X - framePos.X + 15, MIN_WIDTH)
         local newHeight = math.max(mousePos.Y - framePos.Y + 15, MIN_HEIGHT)
-        
         MainFrame.Size = UDim2.new(0, newWidth, 0, newHeight)
     end
 end)
 
--- ==================== CONNECTIONS ====================
+-- ==================== CONNECTIONS (TELEPORT & ESP CẬP NHẬT REALTIME) ====================
 Players.PlayerAdded:Connect(function(p)
     task.wait(0.6)
     updatePlayerList()
@@ -584,4 +563,4 @@ end)
 task.wait(1)
 updatePlayerList()
 if _G.ESPEnabled then refreshESP() end
-print("✅ SCxSuri PREMIUM HUB đã load! (Có nút X + Kéo phóng to/thu nhỏ)")
+print("✅ SCxSuri PREMIUM HUB ĐÃ LOAD XONG (Nút ngoài + Teleport realtime + Resize) - Dùng vui!")
