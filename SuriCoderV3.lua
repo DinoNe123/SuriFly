@@ -573,4 +573,4 @@ end)
 task.wait(1)
 updatePlayerList()
 if _G.ESPEnabled then refreshESP() end
-print("✅ SCxSuri PREMIUM HUB - FINAL VERSION (RESIZE ĐÃ SỬA - CÓ THỂ TO & NHỎ THOẢI MÁI)")
+print("✅ SCxSuri")
