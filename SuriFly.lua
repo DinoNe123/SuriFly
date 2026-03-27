@@ -1,7 +1,6 @@
 -- =============================================
--- SURI | Fly + Invisible - Phiên bản hoàn thiện 2026
--- GUI hiện đại trắng-đen, bo góc
--- E = Toggle Fly | X = Toggle Invisible | RightShift = Ẩn/Hiện GUI
+-- SURI - Fly & Invisible
+-- Phiên bản đầy đủ - GUI hiện đại trắng đen
 -- =============================================
 
 local Players = game:GetService("Players")
@@ -18,10 +17,13 @@ local flySpeed = 60
 local bodyVelocity = nil
 local bodyGyro = nil
 
--- Đợi character load đầy đủ
-player.CharacterAdded:Wait()
-local character = player.Character or player.CharacterAdded:Wait()
-wait(0.5)  -- Đợi một chút để tránh nil
+-- Đợi character load an toàn
+repeat task.wait() until player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+local character = player.Character
+local rootPart = character:WaitForChild("HumanoidRootPart")
+local humanoid = character:WaitForChild("Humanoid")
+
+print("✅ SURI đã load thành công!")
 
 -- ================== TẠO GUI ==================
 local screenGui = Instance.new("ScreenGui")
@@ -36,14 +38,14 @@ mainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
 mainFrame.BorderSizePixel = 0
 mainFrame.Parent = screenGui
 
-local uiCorner = Instance.new("UICorner")
-uiCorner.CornerRadius = UDim.new(0, 18)
-uiCorner.Parent = mainFrame
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 18)
+corner.Parent = mainFrame
 
-local uiStroke = Instance.new("UIStroke")
-uiStroke.Color = Color3.fromRGB(55, 55, 55)
-uiStroke.Thickness = 1.8
-uiStroke.Parent = mainFrame
+local stroke = Instance.new("UIStroke")
+stroke.Color = Color3.fromRGB(55, 55, 55)
+stroke.Thickness = 1.8
+stroke.Parent = mainFrame
 
 -- Title
 local title = Instance.new("TextLabel")
@@ -101,51 +103,46 @@ invisCorner.Parent = invisButton
 
 -- ================== FUNCTION FLY ==================
 local function toggleFly()
-    character = player.Character
-    if not character then return end
-    local root = character:FindFirstChild("HumanoidRootPart")
-    local humanoid = character:FindFirstChild("Humanoid")
-    if not root or not humanoid then return end
-
     flying = not flying
-
+    
     if flying then
         humanoid.PlatformStand = true
-
+        
         bodyVelocity = Instance.new("BodyVelocity")
-        bodyVelocity.MaxForce = Vector3.new(999999, 999999, 999999)
+        bodyVelocity.MaxForce = Vector3.new(9999999, 9999999, 9999999)
         bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-        bodyVelocity.Parent = root
+        bodyVelocity.Parent = rootPart
 
         bodyGyro = Instance.new("BodyGyro")
-        bodyGyro.MaxTorque = Vector3.new(999999, 999999, 999999)
-        bodyGyro.P = 12000
-        bodyGyro.Parent = root
+        bodyGyro.MaxTorque = Vector3.new(9999999, 9999999, 9999999)
+        bodyGyro.P = 12500
+        bodyGyro.Parent = rootPart
 
         flyButton.Text = "Fly : ON"
         flyButton.BackgroundColor3 = Color3.fromRGB(0, 170, 100)
 
-        spawn(function()
-            while flying and character.Parent do
-                local moveDirection = Vector3.new(0,0,0)
+        task.spawn(function()
+            while flying and character and character.Parent do
+                local moveDir = Vector3.new(0, 0, 0)
 
-                if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDirection += camera.CFrame.LookVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDirection -= camera.CFrame.LookVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDirection -= camera.CFrame.RightVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDirection += camera.CFrame.RightVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDirection += Vector3.new(0,1,0) end
-                if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveDirection -= Vector3.new(0,1,0) end
+                if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir += camera.CFrame.LookVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir -= camera.CFrame.LookVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir -= camera.CFrame.RightVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir += camera.CFrame.RightVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir += Vector3.new(0,1,0) end
+                if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveDir -= Vector3.new(0,1,0) end
 
-                if moveDirection.Magnitude > 0 then
-                    moveDirection = moveDirection.Unit * flySpeed
+                if moveDir.Magnitude > 0 then
+                    moveDir = moveDir.Unit * flySpeed
                 end
 
-                bodyVelocity.Velocity = moveDirection
-                bodyGyro.CFrame = camera.CFrame
+                if bodyVelocity then bodyVelocity.Velocity = moveDir end
+                if bodyGyro then bodyGyro.CFrame = camera.CFrame end
 
                 RunService.Heartbeat:Wait()
             end
         end)
+        
     else
         if bodyVelocity then bodyVelocity:Destroy() bodyVelocity = nil end
         if bodyGyro then bodyGyro:Destroy() bodyGyro = nil end
@@ -158,16 +155,13 @@ end
 
 -- ================== FUNCTION INVISIBLE ==================
 local function toggleInvisible()
-    character = player.Character
-    if not character then return end
-
     invisible = not invisible
 
-    for _, v in pairs(character:GetDescendants()) do
-        if v:IsA("BasePart") and v.Name ~= "HumanoidRootPart" then
-            v.Transparency = invisible and 1 or 0
-        elseif v:IsA("Decal") or v:IsA("Texture") then
-            v.Transparency = invisible and 1 or 0
+    for _, obj in pairs(character:GetDescendants()) do
+        if obj:IsA("BasePart") and obj.Name ~= "HumanoidRootPart" then
+            obj.Transparency = invisible and 1 or 0
+        elseif obj:IsA("Decal") or obj:IsA("Texture") then
+            obj.Transparency = invisible and 1 or 0
         end
     end
 
@@ -186,13 +180,12 @@ local function toggleInvisible()
     invisButton.BackgroundColor3 = invisible and Color3.fromRGB(170, 40, 80) or Color3.fromRGB(35, 35, 35)
 end
 
--- ================== KẾT NỐI BUTTON & HOTKEY ==================
+-- ================== KẾT NỐI ==================
 flyButton.MouseButton1Click:Connect(toggleFly)
 invisButton.MouseButton1Click:Connect(toggleInvisible)
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
-    
     if input.KeyCode == Enum.KeyCode.E then
         toggleFly()
     elseif input.KeyCode == Enum.KeyCode.X then
@@ -202,5 +195,4 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
-print("✅ SURI đã load thành công!")
-print("Nhấn E = Fly | X = Invisible | RightShift = Ẩn/Hiện menu")
+print("E = Toggle Fly | X = Toggle Invisible | RightShift = Ẩn/Hiện GUI")
