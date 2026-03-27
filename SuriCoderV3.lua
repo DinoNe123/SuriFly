@@ -1,14 +1,3 @@
---[[
-    🔥 PREMIUM HUB v2 - FINAL UPDATE (CỰC ĐẸP & HOÀN HẢO)
-    Thiết kế sang trọng • Dark Luxury Theme • Gradient + Stroke + Hover + Tween mượt
-    3 Tab: ESP • Teleport • Fly
-    ESP đã bỏ hoàn toàn thanh máu (chỉ còn Highlight + Box 3D + NameTag đẹp)
-    Fly: Toggle + Speed điều chỉnh realtime
-    Keybind: Right Ctrl (bật/tắt ESP)
-    ✨ Nút ngoài "SCx" luôn hiển thị (dành cho điện thoại)
-    ✨ Teleport list LUÔN CẬP NHẬT realtime
-    ✨ KÉO GÓC DƯỚI BÊN PHẢI: ĐÃ SỬA LỖI - BÂY GIỜ CÓ THỂ PHÓNG TO & THU NHỎ ĐẦY ĐỦ
-]]
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
